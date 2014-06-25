@@ -1,3 +1,5 @@
+var path = require("path");
+
 (function() {
 
     if (typeof jasmine == 'undefined') {
@@ -45,11 +47,12 @@
      * @param {string} filePrefix is the string value that is prepended to the
      *                  xml output file; default: 'TEST-'
      */
-    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation, filePrefix) {
+    var JUnitXmlReporter = function(savePath, consolidate, useDotNotation, filePrefix, xsl) {
         this.savePath = savePath || '';
         this.consolidate = consolidate === jasmine.undefined ? true : consolidate;
         this.useDotNotation = useDotNotation === jasmine.undefined ? true : useDotNotation;
         this.filePrefix = filePrefix || 'TEST-';
+        this.xsl = path.normalize(path.resolve(xsl || ''));
     };
     JUnitXmlReporter.started_at = null; // will be updated when test runner start
     JUnitXmlReporter.finished_at = null; // will be updated after all files have been written
@@ -130,7 +133,9 @@
             for (var i = 0; i < suites.length; i++) {
                 var suite = suites[i];
                 var fileName = this.filePrefix + this.getFullName(suite, true) + '.xml';
-                var output = '<?xml version="1.0" encoding="UTF-8" ?>';
+                var output = '<?xml version="1.0" encoding="UTF-8" ?>\n';
+                output += '<?xml-stylesheet name="testsuites" type="text/xsl" href="'+ this.xsl +'"?>\n'
+
                 // if we are consolidating, only write out top-level suites
                 if (this.consolidate && suite.parentSuite) {
                     continue;
